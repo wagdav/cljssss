@@ -32,5 +32,12 @@
           type = "app";
           program = "${self.packages.x86_64-linux.battlesnake-cli}/bin/battlesnake";
         };
+
+        devShell = pkgs.mkShell {
+          buildInputs = with pkgs; [
+            clojure
+            clj-kondo
+          ];
+        };
       });
 }
