@@ -9,9 +9,9 @@
   {:status 200
    :body {:apiversion   "1"
           :author       "wagdav"
-          :color        "#888888"
-          :head         "default"
-          :tail         "default"
+          :color        "#59b300"
+          :head         "smart-caterpillar"
+          :tail         "coffee"
           :version      "0.0.1-beta"}})
 
 (defn start
