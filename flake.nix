@@ -30,7 +30,7 @@
 
         apps.battlesnake = {
           type = "app";
-          program = "${self.packages.x86_64-linux.battlesnake-cli}/bin/battlesnake";
+          program = "${self.packages.${system}.battlesnake-cli}/bin/battlesnake";
         };
 
         devShell = pkgs.mkShell {
