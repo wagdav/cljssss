@@ -23,9 +23,10 @@
 (defn move
   "https://docs.battlesnake.com/api/requests/move"
   [request]
-  {:status 200
-   :body {:move "up"
-          :shout "Moving up!"}})
+  (let [dir (rand-nth ["up" "left" "right" "down"])]
+    {:status 200
+     :body {:move dir
+            :shout "Moving up!"}}))
 
 (defn end
   "https://docs.battlesnake.com/api/requests/end"
