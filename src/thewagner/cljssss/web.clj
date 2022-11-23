@@ -1,27 +1,16 @@
 (ns thewagner.cljssss.web
   (:gen-class) ; for -main method in uberjar
-  (:require [io.pedestal.http :as http]))
-
-; service
-(defn hello-world
-  [request]
-  (let [name (get-in request [:params :name] "World")]
-    {:status 200 :body (str "Hello " name "!\n")}))
-
-(def routes
-  #{["/greet" :get `hello-world]})
+  (:require [io.pedestal.http :as http]
+            [io.pedestal.http.route :as route]
+            [thewagner.cljssss.api :as api]))
 
 (def service {:env                 :prod
-              ::http/routes        routes
-              ::http/resource-path "/public"
+              ::http/routes        api/routes
               ::http/type          :jetty
               ::http/port          8080})
 
-
 ;; This is an adapted service map, that can be started and stopped
 ;; From the REPL you can call http/start and http/stop on this service
-(defonce runnable-service (http/create-server service/service))
-
 (defn run-dev
   "The entry-point for 'lein run-dev'"
   [& args]
@@ -32,7 +21,7 @@
               ::http/join? false
               ;; Routes can be a function that resolve routes,
               ;;  we can use this to set the routes to be reloadable
-              ::http/routes #(deref #'service/routes)
+              ::http/routes #(route/expand-routes (deref #'api/routes))
               ;; all origins are allowed in dev mode
               ::http/allowed-origins {:creds true :allowed-origins (constantly true)}})
       ;; Wire up interceptor chains
@@ -44,5 +33,10 @@
 (defn -main
   "The entry-point for 'lein run'"
   [& args]
-  (println "\nCreating your server...")
-  (http/start runnable-service))
+  (-> service
+      http/create-server
+      http/start))
+
+(comment
+  (def srv (run-dev))
+  (http/stop srv))
