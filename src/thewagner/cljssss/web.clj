@@ -14,7 +14,6 @@
 (defn run-dev
   "The entry-point for 'lein run-dev'"
   [& args]
-  (println "\nCreating your [DEV] server...")
   (-> service ;; start with production configuration
       (merge {:env :dev
               ;; do not block thread that starts web server
