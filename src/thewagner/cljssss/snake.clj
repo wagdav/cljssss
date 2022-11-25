@@ -57,10 +57,8 @@
 
 (defn move
   "Given a game board return the next move"
-  [{:keys [board you] :as state}]
+  [{:keys [you] :as state}]
   (let [head (:head you)
-        width (board :width)
-        height (board :height)
         s (->> (actions state)
                (map #(result state %))
                (apply max-key utility))
