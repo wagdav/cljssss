@@ -1,14 +1,13 @@
 (ns thewagner.cljssss.snake)
 
-(defn actions [{:keys [you]}]
-  (let [{:keys [x y]} (:head you)]
-    (println "Head is" [x y])))
-
-(defn new-head [{:keys [x y]}]
-  (vector {:x (inc x) :y y}
-          {:x (dec x) :y y}
-          {:x x :y (inc y)}
-          {:x x :y (dec y)}))
+(defn actions
+  "Given the game-state return the set of legal moves (new head positions)"
+  [state]
+  (let [head (get-in state [:you :head])]
+    #{(update head :x inc)    ; right
+      (update head :x dec)    ; left
+      (update head :y inc)    ; up
+      (update head :y dec)})) ; down
 
 (defn inside-board? [width height {:keys [x y]}]
   (let [max-x (dec width)
@@ -32,11 +31,11 @@
 
 (defn move
   "Given a game board return the next move"
-  [{:keys [board you]}]
+  [{:keys [board you] :as state}]
   (let [head (:head you)
         width (board :width)
         height (board :height)
-        dirs (->> (new-head head)
+        dirs (->> (actions state)
                   (filter (partial inside-board? width height))
                   (filter #(not (body? you %)))
                   (map (partial direction head)))]
@@ -46,8 +45,8 @@
       {:move (rand-nth dirs)})))
 
 (comment
-  (move {:game {}
-         :board {:width 11 :height 11}
-         :turn 0
-         :you {:head {:x 0 :y 0}
-               :body [{:x 1 :y 0}]}}))
+  (actions {:game {}
+            :board {:width 11 :height 11}
+            :turn 0
+            :you {:head {:x 0 :y 0}
+                  :body [{:x 1 :y 0}]}}))
