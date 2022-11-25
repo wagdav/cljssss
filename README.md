@@ -14,5 +14,5 @@ nix develop --command clojure -M -m thewagner.cljssss.web
 Start the game:
 
 ```
-nix run .#battlesnake -- play --url http://localhost:8080 --viewmap
+nix run .#battlesnake -- play --name cljssss --url http://localhost:8080 --viewmap
 ```
