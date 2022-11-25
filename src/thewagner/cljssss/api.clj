@@ -6,7 +6,7 @@
 
 (defn info
   "https://docs.battlesnake.com/api/requests/info"
-  [request]
+  [_request]
   {:status 200
    :body {:apiversion   "1"
           :author       "wagdav"
@@ -17,7 +17,7 @@
 
 (defn start
   "https://docs.battlesnake.com/api/requests/start"
-  [request]
+  [_request]
   (log/info :msg "Start")
   {:status 200})
 
@@ -29,7 +29,7 @@
 
 (defn end
   "https://docs.battlesnake.com/api/requests/end"
-  [request]
+  [_request]
   (log/info :msg "End")
   {:status 200})
 

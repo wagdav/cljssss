@@ -13,7 +13,7 @@
 ;; From the REPL you can call http/start and http/stop on this service
 (defn run-dev
   "The entry-point for 'lein run-dev'"
-  [& args]
+  [& _args]
   (-> service ;; start with production configuration
       (merge {:env :dev
               ;; do not block thread that starts web server
@@ -31,7 +31,7 @@
 
 (defn -main
   "The entry-point for 'lein run'"
-  [& args]
+  [& _args]
   (-> service
       http/create-server
       http/start))
