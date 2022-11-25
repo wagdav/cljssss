@@ -1,7 +1,8 @@
 (ns thewagner.cljssss.api
   (:require [io.pedestal.http.body-params :as body-params]
             [io.pedestal.http :as http]
-            [io.pedestal.log :as log]))
+            [io.pedestal.log :as log]
+            [thewagner.cljssss.snake :as snake]))
 
 (defn info
   "https://docs.battlesnake.com/api/requests/info"
@@ -23,10 +24,8 @@
 (defn move
   "https://docs.battlesnake.com/api/requests/move"
   [request]
-  (let [dir (rand-nth ["up" "left" "right" "down"])]
-    {:status 200
-     :body {:move dir
-            :shout "Moving up!"}}))
+  {:status 200
+   :body (snake/move (:json-params request))})
 
 (defn end
   "https://docs.battlesnake.com/api/requests/end"
