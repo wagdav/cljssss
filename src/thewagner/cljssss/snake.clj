@@ -1,9 +1,7 @@
 (ns thewagner.cljssss.snake)
 
 (defn self-collision? [{:keys [you]}]
-  (let [head (you :head)
-        body (you :body)]
-    (contains? (into #{} body) head)))
+  (contains? (into #{} (drop 1 (you :body))) (you :head)))
 
 (defn snake-collision? [{:keys [you board]}]
   (let [head (you :head)
@@ -24,30 +22,49 @@
 (defn food? [{:keys [board you]}]
   (some #{(you :head)} (:food board)))
 
+(defn no-health? [state]
+  (= 0 (get-in state [:you :health])))
+
 (defn actions
   "Given the game-state return the set of legal moves (new head positions)"
   [state]
   (let [head (get-in state [:you :head])]
-    #{(update head :x inc)    ; right
-      (update head :x dec)    ; left
-      (update head :y inc)    ; up
-      (update head :y dec)})) ; down
+    #{{:move "right" :head (update head :x inc)}
+      {:move "left"  :head (update head :x dec)}
+      {:move "up"    :head (update head :y inc)}
+      {:move "down"  :head (update head :y dec)}}))
 
 (defn result
   "Transition model: return the result of a move"
-  [state action]
-  (assoc-in state [:you :head] action))
+  [{:keys [board you] :as state} {:keys [head]}]
+  (let [body (you :body)
+        food? (some #{head} (:food board))
+        new-body (if food?
+                   (into [head] body)
+                   (into [head] (butlast body)))
+        new-health (if food?
+                     100
+                     (dec (you :health)))]
+    (-> state
+        (merge {:you {:head head
+                      :body new-body
+                      :health new-health}})
+        (update :turn inc))))
+
+(defn terminal? [state]
+  (or (self-collision? state)
+      (wall-collision? state)
+      (snake-collision? state)
+      (no-health? state)))
 
 (defn utility [state]
   (cond
-    (self-collision? state)  -1
-    (wall-collision? state)  -1
-    (snake-collision? state) -1
-    (food? state)            10
-    :else (rand 5)))
+    (terminal? state) -1
+    :else (get-in state [:you :health])))
 
 (defn cutoff? [state depth]
-  (>= depth 0))
+  (or (>= depth 6)
+      (terminal? state)))
 
 (defn max-value
   ([state]
@@ -55,34 +72,20 @@
   ([state depth]
    (if (cutoff? state depth)
      (utility state)
-     (->> (actions state)
-          (map #(result state %))
-          (map #(max-value % (inc depth)))
-          (apply max)))))
+     (apply max (for [a (actions state)]
+                  (max-value (result state a) (inc depth)))))))
 
 (defn minimax-decision  ; will use α-β pruning later
-  ([state]
-   (->> (actions state)
-        (map #(result state %))
-        (apply max-key max-value))))
-
-(defn direction [p1 p2]
-  (if (= (:y p1) (:y p2))
-    (if (< (:x p1) (:x p2))
-      "right"
-      "left")
-    (if (< (:y p1) (:y p2))
-      "up"
-      "down")))
+  "Returns an action"
+  [state]
+  (apply max-key #(max-value (result state %))
+                 (actions state)))
 
 (defn move
   "Given a game board return the next move"
-  [{:keys [you] :as state}]
-  (let [head (:head you)
-        s (minimax-decision state)
-        new-head (get-in s [:you :head])
-        dir (direction head new-head)]
-   {:move dir}))
+  [state]
+  (let [d (minimax-decision state)]
+    {:move (d :move)}))
 
 (comment
   (def example-state {:game {}
@@ -91,11 +94,29 @@
                               :snakes [{:id 2 :body [{:x 3 :y 4}]}]}
                       :turn 0
                       :you {:id 1
-                            :head {:x 4 :y 4}
-                            :body [{:x 1 :y 0}]}})
-  (actions example-state)
-  (result example-state {:x 10 :y 10})
+                            :head {:x 2 :y 0}
+                            :body [{:x 1 :y 0} {:x 2 :y 0}]
+                            :health 100}})
+
+  (def example2 {:game {}
+                 :board {:width 11
+                         :height 11}
+                 :turn 1
+                 :you {:id 1
+                       :head {:x 4 :y 0}
+                       :body [{:x 4 :y 0} {:x 3 :y 0} {:x 3 :y 1}]
+                       :health 99}})
+  (move example2)
+  (actions example2)
+  (wall-collision? (result example2 {:move "down" :head {:x 4 :y -1}}))
+  (utility (result example2 {:move "up"   :head {:x 4 :y 1}}))
+  (utility (result example2 {:move "down" :head {:x 4 :y -1}}))
+  (max-value (result example2 {:move "up"   :head {:x 4 :y 1}}) 0)
+  (max-value (result example2 {:move "down" :head {:x 4 :y -1}}) 0)
+
+  (utility (result example-state {:head {:x 10 :y 10}}))
   (wall-collision? example-state)
+  (self-collision? example-state)
   (snake-collision? example-state)
   (utility example-state)
   (move example-state))
