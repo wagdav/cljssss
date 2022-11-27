@@ -46,6 +46,26 @@
     (food? state)            10
     :else (rand 5)))
 
+(defn cutoff? [state depth]
+  (>= depth 0))
+
+(defn max-value
+  ([state]
+   (max-value state 0))
+  ([state depth]
+   (if (cutoff? state depth)
+     (utility state)
+     (->> (actions state)
+          (map #(result state %))
+          (map #(max-value % (inc depth)))
+          (apply max)))))
+
+(defn minimax-decision  ; will use α-β pruning later
+  ([state]
+   (->> (actions state)
+        (map #(result state %))
+        (apply max-key max-value))))
+
 (defn direction [p1 p2]
   (if (= (:y p1) (:y p2))
     (if (< (:x p1) (:x p2))
@@ -59,9 +79,7 @@
   "Given a game board return the next move"
   [{:keys [you] :as state}]
   (let [head (:head you)
-        s (->> (actions state)
-               (map #(result state %))
-               (apply max-key utility))
+        s (minimax-decision state)
         new-head (get-in s [:you :head])
         dir (direction head new-head)]
    {:move dir}))
