@@ -1,23 +1,32 @@
 (ns thewagner.cljssss.snake)
 
-(defn self-collision? [{:keys [you]}]
-  (contains? (into #{} (drop 1 (you :body))) (you :head)))
+(defn self-collision?
+  ([state]
+   (self-collision? state (state :you)))
+  ([_state snake]
+   (contains? (into #{} (drop 1 (snake :body))) (snake :head))))
 
-(defn snake-collision? [{:keys [you board]}]
-  (let [head (you :head)
-        id (you :id)
-        snakes (filter #(not= id (:id %)) (board :snakes))]
-    (contains? (into #{} (apply concat (map :body snakes)))
-               head)))
+(defn snake-collision?
+  ([state]
+   (snake-collision? state (state :you)))
+  ([{:keys [board]} snake]
+   (let [head (snake :head)
+         id (snake :id)
+         snakes (filter #(not= id (:id %)) (board :snakes))]
+     (contains? (into #{} (apply concat (map :body snakes)))
+                head))))
 
-(defn wall-collision? [state]
+(defn wall-collision?
+ ([state]
+  (wall-collision? state (state :you)))
+ ([state snake]
   (let [width (get-in state [:board :width])
         height (get-in state [:board :height])
-        head (get-in state [:you :head])
+        head (snake :head)
         max-x (dec width)
         max-y (dec height)]
     (not (and (<= 0 (head :x) max-x)
-              (<= 0 (head :y) max-y)))))
+              (<= 0 (head :y) max-y))))))
 
 (defn food? [{:keys [board you]}]
   (some #{(you :head)} (:food board)))
