@@ -1,0 +1,20 @@
+<!-- Logback configuration. See http://logback.qos.ch/manual/index.html -->
+<configuration scan="true" scanPeriod="10 seconds">
+  <!-- Console output -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoder defaults to ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+    <encoder>
+      <pattern>%-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+  <!-- For loggers in the these namespaces, log at all levels. -->
+  <logger name="user" level="ALL" />
+  <logger name="org.eclipse.jetty" level="INFO" />
+  <logger name="io.pedestal" level="WARN" />
+  <logger name="thewagner.cljssss" level="INFO" />
+</configuration>
