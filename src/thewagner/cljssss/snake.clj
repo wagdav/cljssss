@@ -95,8 +95,10 @@
 (defn minimax-decision  ; will use α-β pruning later
   "Returns an action"
   [state]
-  (apply max-key #(max-value (result state %))
-                 (actions state)))
+  (let [as (actions state)]
+    (if (empty? as)
+      {:move (rand-nth ["left" "right" "up" "down"])}
+      (apply max-key #(max-value (result state %)) as))))
 
 (defn move
   "Given a game board return the next move"
