@@ -27,7 +27,7 @@ Run the web server:
 nix develop --command clojure -M -m thewagner.cljssss.web
 ```
 
-Start the game:
+Start the game by running [battlesnake engine](https://github.com/BattlesnakeOfficial/rules/tree/v2.0.0/cli) locally:
 
 ```
 nix run .#battlesnake -- play --name cljssss --url http://localhost:8080 --viewmap
