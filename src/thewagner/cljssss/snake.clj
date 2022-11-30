@@ -39,10 +39,11 @@
   "Given the game-state return the set of legal moves (new head positions)"
   [state]
   (let [head (get-in state [:you :head])]
-    #{{:move "right" :head (update head :x inc)}
-      {:move "left"  :head (update head :x dec)}
-      {:move "up"    :head (update head :y inc)}
-      {:move "down"  :head (update head :y dec)}}))
+    (remove (fn [m] (some #{(:head m)} (get-in state [:you :body])))
+      #{{:move "right" :head (update head :x inc)}
+        {:move "left"  :head (update head :x dec)}
+        {:move "up"    :head (update head :y inc)}
+        {:move "down"  :head (update head :y dec)}})))
 
 (defn result
   "Transition model: return the result of a move"
