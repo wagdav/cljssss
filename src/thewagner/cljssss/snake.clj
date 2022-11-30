@@ -72,7 +72,7 @@
 (defn utility [state]
   (cond
     (terminal? state) -1
-    :else (get-in state [:you :health])))
+    :else (get-in state [:turn])))
 
 (defn cutoff
   "Returns a predicate to cut off the deepending at most at max-depth"
