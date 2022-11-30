@@ -5,7 +5,7 @@
   ([state]
    (self-collision? state (state :you)))
   ([_state snake]
-   (contains? (into #{} (drop 1 (snake :body))) (snake :head))))
+   (< 1 (get (frequencies (snake :body)) (snake :head)))))
 
 (defn snake-collision?
   ([state]
