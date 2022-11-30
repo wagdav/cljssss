@@ -1,4 +1,5 @@
-(ns thewagner.cljssss.snake)
+(ns thewagner.cljssss.snake
+  (:require [thewagner.cljssss.search :as search]))
 
 (defn self-collision?
   ([state]
@@ -71,18 +72,23 @@
     (terminal? state) -1
     :else (get-in state [:you :health])))
 
-(defn cutoff? [state depth]
-  (or (>= depth 6)
-      (terminal? state)))
+(defn cutoff
+  "Returns a predicate to cut off the deepending at most at max-depth"
+  [max-depth]
+  (fn [state depth]
+    (or (>= depth max-depth)
+        (terminal? state))))
 
 (defn max-value
   ([state]
    (max-value state 0))
   ([state depth]
-   (if (cutoff? state depth)
-     (utility state)
-     (apply max (for [a (actions state)]
-                  (max-value (result state a) (inc depth)))))))
+   (let [cutoff? (get state ::cutoff (cutoff 4))
+         as (actions state)]
+     (if (or (cutoff? state depth) (empty? as))
+       (utility state)
+       (apply max (for [a as]
+                    (max-value (result state a) (inc depth))))))))
 
 (defn minimax-decision  ; will use α-β pruning later
   "Returns an action"
@@ -93,8 +99,13 @@
 (defn move
   "Given a game board return the next move"
   [state]
-  (let [d (minimax-decision state)]
-    {:move (d :move)}))
+  (let [timeout-ms (get-in state [:game :timeout])
+        dls (fn [depth]
+              (minimax-decision (assoc state ::cutoff (cutoff depth))))]
+
+    (select-keys
+      (search/iterative-deepening dls (* 0.8 timeout-ms))
+      [:move :shout])))
 
 (comment
   (def example-state {:game {}
