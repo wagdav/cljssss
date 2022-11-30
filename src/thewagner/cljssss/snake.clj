@@ -60,6 +60,7 @@
         (merge {:you {:head head
                       :body new-body
                       :health new-health}})
+        (assoc-in [:board :food] (remove #{head} (:food board)))
         (update :turn inc))))
 
 (defn terminal? [state]
